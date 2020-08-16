@@ -1,18 +1,4 @@
-import sys
 import numpy as np
-import data_stream as ds
-
-np.set_printoptions(threshold=sys.maxsize)
-np.random.seed(12445512)
-
-epoch_size = 1024
-
-print("Reading data")
-
-# random sample input data
-X = ds.read_train_images(epoch_size)
-
-y = ds.read_train_labels(epoch_size)
 
 
 def reLU(a):
@@ -88,7 +74,7 @@ class Model:
 
             for batch_start in range(0, cols, batch_size):
 
-                cost = 0.0
+                cost = 0
                 for col in range(batch_start, batch_start + batch_size):
                     (X_t, X_e) = training_data[col]
                     a_n = self.forward_pass(X_t)
@@ -99,15 +85,3 @@ class Model:
 
     def back_propogate(self):
         pass
-
-
-print("Processing data")
-p = []
-for col in range(epoch_size):
-    entry = (X[:, col].reshape(28 * 28, 1), y[:, col])
-    p.append(entry)
-
-model = Model([16, 16], 28 * 28, 10)
-
-print("Fitting model")
-model.fit(p, 1, 32)
