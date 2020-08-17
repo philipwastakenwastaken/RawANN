@@ -5,6 +5,11 @@ def reLU(a):
     return np.maximum(a, 0)
 
 
+# derirative
+def reLU_prime(a):
+    return np.greater(a, 0)
+
+
 def softmax(a):
     exp = np.exp(a)
     return exp / np.sum(exp)
@@ -64,6 +69,14 @@ class Model:
         sub = np.subtract(expected, output)
         return np.linalg.norm(sub) ** 2
 
+    # TODO
+    def backprop(self, x, y):
+        nabla_w = [np.zeros(layer.weights.shape())
+                   for layer in self.hidden_layers]
+        nabla_b = [np.zeros(layer.biases.shape())
+                   for layer in self.hidden_layers]
+        return nabla_w, nabla_b
+
     def update_mini_batches(self, mini_batch, learning_rate):
         # gradient for weight and biases
         nabla_w = [np.zeros(layer.weights.shape())
@@ -85,9 +98,10 @@ class Model:
         # from our batches.
         # we will now step in the opposite direction according to the
         # learning rate in order to find a local (hopefully global) minimum
+        n = len(mini_batch)
         for layer, nw, nb in zip(self.hidden_layers, nabla_w, nabla_b):
-            layer.weights = layer.weights - learning_rate / len(mini_batch) * nw
-            layer.biases = layer.biases - learning_rate / len(mini_batch) * nb
+            layer.weights = layer.weights - learning_rate / n * nw
+            layer.biases = layer.biases - learning_rate / n * nb
 
     def fit(self, training_data, learning_rate, epochs=1, batch_size=16):
         cols = len(training_data)
@@ -104,7 +118,3 @@ class Model:
             # update weights and biases for each batch
             for mini_batch in mini_batches:
                 self.update_mini_batches(mini_batch, learning_rate)
-
-    # TODO
-    def backprop(self, x, y):
-        return (x, y)
