@@ -64,7 +64,32 @@ class Model:
         sub = np.subtract(expected, output)
         return np.linalg.norm(sub) ** 2
 
-    def fit(self, training_data, epochs=1, batch_size=1):
+    def update_mini_batches(self, mini_batch, learning_rate):
+        # gradient for weight and biases
+        nabla_w = [np.zeros(layer.weights.shape())
+                   for layer in self.hidden_layers]
+        nabla_b = [np.zeros(layer.biases.shape())
+                   for layer in self.hidden_layers]
+
+        # STOCHASTIC GRADIENT DESCENT
+        for x, y in mini_batch:
+            # delta for gradient; how much does individual data point
+            # affect parameters?
+            delta_nabla_w, delta_nabla_b = self.backprop(x, y)
+
+            # summing all the deltas here
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+            nabla_b = [nb + dnw for nb, dnw in zip(nabla_b, delta_nabla_b)]
+
+        # we now have an approximation for the gradient descent
+        # from our batches.
+        # we will now step in the opposite direction according to the
+        # learning rate in order to find a local (hopefully global) minimum
+        for layer, nw, nb in zip(self.hidden_layers, nabla_w, nabla_b):
+            layer.weights = layer.weights - learning_rate / len(mini_batch) * nw
+            layer.biases = layer.biases - learning_rate / len(mini_batch) * nb
+
+    def fit(self, training_data, learning_rate, epochs=1, batch_size=16):
         cols = len(training_data)
 
         for _ in range(epochs):
@@ -72,16 +97,14 @@ class Model:
             # shuffle data every epoch
             np.random.shuffle(training_data)
 
-            for batch_start in range(0, cols, batch_size):
+            # split data into mini batches
+            mini_batches = [training_data[i:cols+batch_size]
+                            for i in range(0, cols, batch_size)]
 
-                cost = 0
-                for col in range(batch_start, batch_start + batch_size):
-                    (X_t, X_e) = training_data[col]
-                    a_n = self.forward_pass(X_t)
-                    cost += self.mse_cost(a_n, X_e)
+            # update weights and biases for each batch
+            for mini_batch in mini_batches:
+                self.update_mini_batches(mini_batch, learning_rate)
 
-                cost /= 2 * batch_size
-                print(cost)
-
-    def back_propogate(self):
-        pass
+    # TODO
+    def backprop(self, x, y):
+        return (x, y)

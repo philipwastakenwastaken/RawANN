@@ -24,4 +24,4 @@ for col in range(epoch_size):
 model = nn.Model([16, 16], 28 * 28, 10)
 
 print("Fitting model")
-model.fit(p, 1, 32)
+model.fit(p, 0.001, 1, 32)
